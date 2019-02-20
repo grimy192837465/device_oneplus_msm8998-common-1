@@ -28,7 +28,7 @@
  */
 
 #define LOG_NIDEBUG 0
-#define LOG_TAG "android.hardware.power@1.2-service.oneplus5-libperfmgr"
+#define LOG_TAG "android.hardware.power@1.2-service.msm8998-libperfmgr"
 
 #include <errno.h>
 #include <inttypes.h>
@@ -42,7 +42,6 @@
 #include <log/log.h>
 
 #include "power-helper.h"
-#include "utils.h"
 
 #ifndef RPM_SYSTEM_STAT
 #define RPM_SYSTEM_STAT "/d/system_stats"
@@ -50,10 +49,6 @@
 
 #ifndef WLAN_POWER_STAT
 #define WLAN_POWER_STAT "/d/wlan0/power_stats"
-#endif
-
-#ifndef TAP_TO_WAKE_NODE
-#define TAP_TO_WAKE_NODE "/proc/touchpanel/double_tap_enable"
 #endif
 
 #define ARRAY_SIZE(x) (sizeof((x))/sizeof((x)[0]))
@@ -90,47 +85,6 @@ struct stat_pair wlan_stat_map[] = {
     { WLAN_POWER_DEBUG_STATS, "POWER DEBUG STATS", wlan_power_stat_params, ARRAY_SIZE(wlan_power_stat_params) },
 };
 
-static int sysfs_write(char *path, char *s)
-{
-    char buf[80];
-    int len;
-    int ret = 0;
-    int fd = open(path, O_WRONLY);
-
-    if (fd < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error opening %s: %s\n", path, buf);
-        return -1 ;
-    }
-
-    len = write(fd, s, strlen(s));
-    if (len < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error writing to %s: %s\n", path, buf);
-
-        ret = -1;
-    }
-
-    close(fd);
-
-    return ret;
-}
-
-void __attribute__((weak)) set_device_specific_feature(__unused feature_t feature, __unused int state)
-{
-}
-
-void set_feature(feature_t feature, int state) {
-    switch (feature) {
-        case POWER_FEATURE_DOUBLE_TAP_TO_WAKE:
-            sysfs_write(TAP_TO_WAKE_NODE, state ? "1" : "0");
-            break;
-        default:
-            break;
-    }
-    set_device_specific_feature(feature, state);
-}
-
 static int parse_stats(const char **params, size_t params_size,
                        uint64_t *list, FILE *fp) {
     ssize_t nread;
@@ -166,16 +120,6 @@ static int parse_stats(const char **params, size_t params_size,
     return 0;
 }
 
-void set_feature(feature_t feature, int state)
-{
-    switch (feature) {
-        case POWER_FEATURE_DOUBLE_TAP_TO_WAKE:
-            sysfs_write(TAP_TO_WAKE_NODE, state ? "1" : "0");
-            break;
-        default:
-            break;
-    }
-}
 
 static int extract_stats(uint64_t *list, char *file,
                          struct stat_pair *map, size_t map_size) {
