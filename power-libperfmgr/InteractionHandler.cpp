@@ -16,7 +16,7 @@
 
 //#define LOG_NDEBUG 0
 
-#define LOG_TAG "android.hardware.power@1.2-service.oneplus5-libperfmgr"
+#define LOG_TAG "android.hardware.power@1.2-service.msm8998-libperfmgr"
 #define ATRACE_TAG (ATRACE_TAG_POWER | ATRACE_TAG_HAL)
 
 #include <fcntl.h>
